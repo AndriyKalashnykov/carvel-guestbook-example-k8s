@@ -11,15 +11,20 @@ Head over to [k14s.io](https://k14s.io/) for installation instructions.
 ## Deploy
 
 ```bash
-git clone https://github.com/vmware-tanzu/carvel-guestbook-example-on-kubernetes
-cd carvel-guestbook-example-on-kubernetes/
+git clone https://github.com/AndriyKalashnykov/carvel-guestbook-example-k8s.git
+cd carvel-guestbook-example-k8s/
 ```
 
-Using k14s tools, deploy via:
+Deploy:
 
 ```bash
+docker login
+kapp deploy -a guestbook -f <(ytt -f config/ --data-value external_ip=true --data-value push_images_repo=docker.io/andriykalashnykov) --diff-changes --yes
+kapp deploy -a guestbook -f <(ytt -f config/ --data-value external_ip=true --data-value push_images=false --data-value push_images_repo=docker.io/andriykalashnykov | kbld -f-) --diff-changes --yes
+kapp inspect -a guestbook --tree
 
-kapp deploy -a guestbook -f <(ytt -f config/ | kbld -f-) --diff-changes
+# kapp deploy -a guestbook -f <(ytt -f config/ | kbld -f-) --diff-changes
+# kapp delete -a guestbook --yes
 ```
 
 Above command does the following:
@@ -141,6 +146,3 @@ Here are some features of k14s tools as used in this example:
 - all pod logs from this application could be found via `kapp logs -f -a guestbook`
 
 - delete: `kapp delete -a guestbook --yes`
-
-kapp deploy -a guestbook -f <(ytt -f config/ --data-value push_images=true --data-value push_images_repo=docker.io/andriykalashnykov | kbld -f-) --diff-changes
-kapp inspect -a guestbook --tree

@@ -1,10 +1,14 @@
 #@ load("@ytt:data", "data")
 
+#@ if/end data.values.push_images:
+---
 apiVersion: kbld.k14s.io/v1alpha1
 kind: ImageOverrides
 overrides:
 - image: k8s.gcr.io/redis:e2e
   newImage: redis:3.2.9 #! Use same redis version as one used for redis-slave
+
+#@ if/end data.values.push_images:  
 ---
 apiVersion: kbld.k14s.io/v1alpha1
 kind: Sources

@@ -14,11 +14,6 @@ spec:
   ports:
   - port: #@ data.values.redis_port
   selector: #@ labels()
-  #@ if data.values.external_ip:
-  type: ClusterIP
-  #@ else:
-  type: LoadBalancer
-  #@ end  
 ---
 apiVersion: apps/v1
 kind: Deployment

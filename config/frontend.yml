@@ -17,9 +17,9 @@ spec:
   - port: #@ frontend_port
   selector: #@ labels()
   #@ if data.values.external_ip:
-  type: ClusterIP
-  #@ else:
   type: LoadBalancer
+  #@ else:
+  type: ClusterIP
   #@ end
 ---
 apiVersion: apps/v1
