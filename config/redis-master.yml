@@ -1,0 +1,50 @@
+#@ load("@ytt:data", "data")
+
+#@ def labels():
+redis-master: ""
+#@ end
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: redis-master
+spec:
+  ports:
+  - port: #@ data.values.redis_port
+    targetPort: #@ data.values.redis_port
+  selector: #@ labels()
+  #@ if data.values.external_ip:
+  type: ClusterIP
+  #@ else:
+  type: LoadBalancer
+  #@ end  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: redis-master
+  annotations:
+    kapp.k14s.io/update-strategy: fallback-on-replace
+spec:
+  replicas: 1
+  selector:
+    matchLabels: #@ labels()
+  template:
+    metadata:
+      labels: #@ labels()
+    spec:
+      containers:
+      - name: master
+        image: k8s.gcr.io/redis:e2e
+        resources:
+          requests:
+            cpu: 120m
+            memory: 100Mi
+        ports:
+        - containerPort: #@ data.values.redis_port
+        env:
+        - name: FOO
+          value: FOO

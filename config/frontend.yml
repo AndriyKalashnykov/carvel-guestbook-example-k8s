@@ -1,0 +1,62 @@
+#@ load("@ytt:data", "data")
+
+#@ frontend_port = 80
+
+#@ def labels():
+frontend: ""
+#@ end
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: frontend
+spec:
+  ports:
+  - port: #@ frontend_port
+  selector: #@ labels()
+  #@ if data.values.external_ip:
+  type: ClusterIP
+  #@ else:
+  type: LoadBalancer
+  #@ end
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: frontend
+  annotations:
+    kapp.k14s.io/update-strategy: fallback-on-replace
+spec:
+  replicas: 1
+  selector:
+    matchLabels: #@ labels()
+  template:
+    metadata:
+      labels: #@ labels()
+    spec:
+      containers:
+      - name: frontend
+        image: gcr.io/google-samples/gb-frontend:v4
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        envFrom:
+        - configMapRef:
+            name: frontend-config
+        ports:
+        - containerPort: #@ frontend_port
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: default
+  name: frontend-config
+  annotations:
+    kapp.k14s.io/versioned: ""
+data:
+  GUESTBOOK_REDIS_PORT: #@ str(data.values.redis_port)
+  GUESTBOOK_BG: "#eee"
